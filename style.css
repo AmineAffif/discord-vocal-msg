@@ -213,6 +213,16 @@
   transform: scale(1.05);
 }
 
+/* 🔹 Cacher l'élément audio */
+.voice-preview-container audio {
+  display: none !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 /* 🔹 Padding pour la zone de texte Discord */
 div[class*="channelTextArea"] {
   padding: 0 0.5rem !important;
