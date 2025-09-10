@@ -181,9 +181,9 @@ class PopupManager {
     const linkText = e.target.textContent.toLowerCase();
 
     const links = {
+      portfolio: "https://www.dev-amine.com/",
+      github: "https://github.com/AmineAffif/",
       support: "https://discord.gg/your-support-server",
-      documentation: "https://docs.discord-vocal.com",
-      discord: "https://discord.gg/your-discord-server",
     };
 
     const url = links[linkText];
