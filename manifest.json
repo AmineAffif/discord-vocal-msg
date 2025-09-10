@@ -1,15 +1,19 @@
 {
   "manifest_version": 3,
-  "name": "Discord Vocaux (V1)",
+  "name": "Discord audio messages",
   "version": "1.0",
-  "description": "Ajoute un bouton 🎙️ pour enregistrer et envoyer des messages vocaux sur Discord.",
+  "description": "Adds a 🎙️ button to record and send audio messages on Discord.",
   "icons": {
     "16": "icon16.png",
     "48": "icon48.png",
     "128": "icon128.png"
   },
-  "permissions": ["activeTab", "scripting"],
+  "permissions": ["activeTab", "scripting", "storage"],
   "host_permissions": ["https://discord.com/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Discord vocal - Plans & Features"
+  },
   "content_scripts": [
     {
       "matches": ["https://discord.com/*"],

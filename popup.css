@@ -1,0 +1,502 @@
+/* 🔹 POPUP STYLES - Discord Vocal Extension */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  background: linear-gradient(135deg, #1a1d23 0%, #2a2d35 100%);
+  color: #e8eaed;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.popup-container {
+  width: 600px;
+  min-height: 700px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 🔹 HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28px 36px;
+  background: rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-radius: 16px 16px 0 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo .icon {
+  font-size: 24px;
+}
+
+.logo h1 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.version {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* 🔹 CURRENT PLAN */
+.current-plan {
+  padding: 24px 36px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.plan-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.plan-badge.free {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3);
+}
+
+.plan-badge.starter {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.plan-badge.pro {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.plan-badge.ultimate {
+  background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+}
+
+.plan-status {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+/* 🔹 PLANS SECTION */
+.plans-section {
+  padding: 36px;
+  background: transparent;
+}
+
+.plans-section h2 {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 32px;
+  text-align: center;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 🔹 PLAN CARDS */
+.plan-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.plan-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.plan-card.current-plan {
+  border-color: rgba(139, 92, 246, 0.5);
+  background: rgba(139, 92, 246, 0.1);
+  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.3);
+}
+
+.plan-card.free-plan {
+  border-color: rgba(74, 222, 128, 0.3);
+}
+
+.plan-card.free-plan:hover {
+  border-color: rgba(74, 222, 128, 0.5);
+  box-shadow: 0 12px 24px rgba(74, 222, 128, 0.15);
+}
+
+.plan-card.starter-plan {
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.plan-card.starter-plan:hover {
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 12px 24px rgba(245, 158, 11, 0.15);
+}
+
+.plan-card.pro-plan {
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.plan-card.pro-plan:hover {
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 12px 24px rgba(139, 92, 246, 0.15);
+}
+
+.plan-card.ultimate-plan {
+  border-color: rgba(236, 72, 153, 0.3);
+  background: rgba(236, 72, 153, 0.05);
+}
+
+.plan-card.ultimate-plan:hover {
+  border-color: rgba(236, 72, 153, 0.5);
+  box-shadow: 0 12px 24px rgba(236, 72, 153, 0.15);
+}
+
+.plan-card.ultimate-plan::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  background: linear-gradient(
+    45deg,
+    #ec4899,
+    #f59e0b,
+    #8b5cf6,
+    #22c55e,
+    #ec4899,
+    #f59e0b,
+    #8b5cf6,
+    #22c55e
+  );
+  background-size: 400% 400%;
+  animation: shimmerBorder 8s linear infinite;
+  border-radius: 17px;
+  z-index: -1;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  padding: 1px;
+}
+
+.plan-card.ultimate-plan::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  z-index: -1;
+}
+
+@keyframes shimmerBorder {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* 🔹 PLAN HEADER */
+.plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.plan-header h3 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.plan-price {
+  font-size: 20px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.plan-subtitle {
+  font-size: 14px;
+  color: #a1a1aa;
+  margin-bottom: 20px;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+/* 🔹 FEATURES LIST */
+.features-list {
+  list-style: none;
+  margin-bottom: 28px;
+}
+
+.features-list li {
+  padding: 10px 0;
+  font-size: 14px;
+  color: #e4e4e7;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+.features-list li strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* 🔹 FEATURE SWITCHES */
+.feature-switch {
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background: #40444b;
+  position: relative;
+  flex-shrink: 0;
+  margin-left: auto;
+  transition: all 0.3s ease;
+  float: right;
+  border: 2px solid #52525b;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.feature-switch::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #9ca3af;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.feature-switch.disabled {
+  background: #374151;
+  border-color: #4b5563;
+  opacity: 0.8;
+}
+
+.feature-switch.disabled::before {
+  background: #6b7280;
+  left: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* 🔹 PLAN BUTTONS */
+.plan-btn {
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+  position: relative;
+  overflow: hidden;
+}
+
+.plan-btn.current {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  color: #ffffff;
+  cursor: default;
+  box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3);
+}
+
+.plan-btn.upgrade {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.plan-btn.upgrade:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+}
+
+.plan-btn.upgrade:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+/* 🔹 FOOTER */
+.footer {
+  padding: 28px 36px;
+  background: rgba(255, 255, 255, 0.03);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0 0 16px 16px;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  margin-bottom: 16px;
+}
+
+.footer-link {
+  color: #8b5cf6;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.footer-link:hover {
+  color: #ffffff;
+  background: rgba(139, 92, 246, 0.1);
+  text-decoration: none;
+}
+
+.footer-text {
+  text-align: center;
+  font-size: 13px;
+  color: #a1a1aa;
+  opacity: 0.8;
+  font-weight: 400;
+}
+
+/* 🔹 SCROLLBAR */
+.popup-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.popup-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.popup-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.popup-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.6);
+}
+
+/* 🔹 ANIMATIONS */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.plan-card {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.plan-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.plan-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.plan-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.plan-card:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+/* 🔹 NOTIFICATIONS */
+.notification {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.notification.info {
+  background: rgba(88, 101, 242, 0.9);
+}
+
+.notification.success {
+  background: rgba(59, 165, 92, 0.9);
+}
+
+.notification.error {
+  background: rgba(237, 66, 69, 0.9);
+}
+
+.notification.warning {
+  background: rgba(250, 166, 26, 0.9);
+}
