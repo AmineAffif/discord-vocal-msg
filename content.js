@@ -16,7 +16,7 @@ const CONFIG = {
       "emojiButtonNormal__04eed emojiButton__04eed emojiButton__74017 button__74017",
   },
   PERFORMANCE: {
-    THROTTLE_TIME: 100,
+    THROTTLE_TIME: 16,
     DRAG_THROTTLE: 16,
     FILE_PROCESSING_DELAY: 500,
   },
@@ -226,11 +226,12 @@ class AudioPreview {
     this.file = file;
     this.fileInput = fileInput;
     this.audio = null;
+    this.wavesurfer = null;
     this.elements = {};
     this.state = {
       isPlaying: false,
       isDragging: false,
-      lastUpdateTime: 0,
+      animationId: null,
     };
     this.cache = {
       rect: null,
@@ -245,6 +246,7 @@ class AudioPreview {
     this.createPreviewHTML();
     this.insertPreview();
     this.setupEventListeners();
+    this.initWaveform();
   }
 
   removeExistingPreview() {
@@ -275,11 +277,8 @@ class AudioPreview {
           <button class="voice-control-btn" id="voice-play-btn">
             ${ICONS.PLAY}
           </button>
-          <div class="voice-progress-container">
-            <div class="voice-progress-bar" id="voice-progress-bar">
-              <div class="voice-progress-fill" id="voice-progress-fill"></div>
-              <div class="voice-progress-thumb" id="voice-progress-thumb"></div>
-            </div>
+          <div class="voice-waveform-container">
+            <div id="voice-waveform"></div>
           </div>
           <div class="voice-time" id="voice-time">0:00 / 0:00</div>
         </div>
@@ -313,11 +312,9 @@ class AudioPreview {
   cacheElements() {
     this.elements = {
       playBtn: document.getElementById("voice-play-btn"),
-      progressFill: document.getElementById("voice-progress-fill"),
-      progressThumb: document.getElementById("voice-progress-thumb"),
-      progressBar: document.getElementById("voice-progress-bar"),
       timeDisplay: document.getElementById("voice-time"),
       controlsContainer: document.querySelector(".voice-preview-controls"),
+      waveformContainer: document.getElementById("voice-waveform"),
     };
   }
 
@@ -325,7 +322,8 @@ class AudioPreview {
     this.audio.addEventListener("loadedmetadata", () =>
       this.handleMetadataLoaded()
     );
-    this.audio.addEventListener("timeupdate", () => this.handleTimeUpdate());
+    this.audio.addEventListener("play", () => this.startProgressAnimation());
+    this.audio.addEventListener("pause", () => this.stopProgressAnimation());
     this.audio.addEventListener("ended", () => this.handleAudioEnded());
   }
 
@@ -336,18 +334,7 @@ class AudioPreview {
   }
 
   setupNavigationEvents() {
-    this.elements.progressBar.addEventListener("click", (e) =>
-      this.handleProgressClick(e)
-    );
-    this.elements.progressThumb.addEventListener("mousedown", (e) =>
-      this.handleThumbDrag(e)
-    );
-    this.elements.controlsContainer.addEventListener("mousedown", (e) =>
-      this.handleControlsDrag(e)
-    );
-    this.elements.controlsContainer.addEventListener("click", (e) =>
-      this.handleControlsClick(e)
-    );
+    // WaveSurfer gère les clics et le drag automatiquement
   }
 
   setupActionEvents() {
@@ -359,35 +346,195 @@ class AudioPreview {
       .addEventListener("click", () => this.send());
   }
 
-  handleMetadataLoaded() {
-    const duration = AudioUtils.formatTime(this.audio.duration);
-    DOMUtils.safeSetTextContent(
-      this.elements.timeDisplay,
-      `0:00 / ${duration}`
-    );
-    this.cache.duration = this.audio.duration;
+  initWaveform() {
+    this.createNativeWaveform();
+    this.setupWaveformEvents();
   }
 
-  handleTimeUpdate() {
-    if (
-      !this.state.isDragging &&
-      Date.now() - this.state.lastUpdateTime > CONFIG.PERFORMANCE.THROTTLE_TIME
-    ) {
-      this.updateProgress();
-      this.state.lastUpdateTime = Date.now();
+  createNativeWaveform() {
+    const canvas = document.createElement("canvas");
+    canvas.width = 400;
+    canvas.height = 40;
+    canvas.style.width = "100%";
+    canvas.style.height = "40px";
+    canvas.style.cursor = "pointer";
+    canvas.id = "voice-waveform-canvas";
 
-      if (this.audio.currentTime === 0 && this.state.isPlaying) {
-        console.log(
-          "🚨 PROBLÈME DÉTECTÉ - currentTime remis à 0 pendant la lecture!"
-        );
+    this.elements.waveformContainer.innerHTML = "";
+    this.elements.waveformContainer.appendChild(canvas);
+
+    this.canvas = canvas;
+    this.ctx = canvas.getContext("2d");
+    this.waveformData = null;
+
+    this.analyzeAudio();
+  }
+
+  async analyzeAudio() {
+    try {
+      const arrayBuffer = await this.blob.arrayBuffer();
+      const audioContext = new (window.AudioContext ||
+        window.webkitAudioContext)();
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+      const channelData = audioBuffer.getChannelData(0);
+      const samples = 200; // Nombre de barres
+      const blockSize = Math.floor(channelData.length / samples);
+      this.waveformData = [];
+
+      for (let i = 0; i < samples; i++) {
+        let sum = 0;
+        for (let j = 0; j < blockSize; j++) {
+          sum += Math.abs(channelData[i * blockSize + j]);
+        }
+        const amplitude = sum / blockSize;
+        // Normaliser et ajouter un minimum pour les silences
+        this.waveformData.push(Math.max(0.1, amplitude * 2));
       }
+
+      this.drawWaveform();
+      audioContext.close();
+    } catch (error) {
+      console.error("Erreur analyse audio:", error);
+    }
+  }
+
+  drawWaveform(progress = 0) {
+    if (!this.waveformData || !this.ctx) return;
+
+    const canvas = this.canvas;
+    const ctx = this.ctx;
+    const width = canvas.width;
+    const height = canvas.height;
+
+    ctx.clearRect(0, 0, width, height);
+
+    const barWidth = width / this.waveformData.length;
+    const progressWidth = width * progress;
+    const minBarHeight = height * 0.1; // Hauteur minimum pour les barres
+
+    this.waveformData.forEach((amplitude, index) => {
+      const x = index * barWidth;
+      // Hauteur minimum + amplitude, pour toujours voir quelque chose
+      const barHeight = Math.max(minBarHeight, amplitude * height * 0.8);
+      const y = (height - barHeight) / 2;
+
+      if (x < progressWidth) {
+        ctx.fillStyle = "#5865f2"; // Couleur de progression
+      } else {
+        ctx.fillStyle = "#40444b"; // Couleur de base
+      }
+
+      ctx.fillRect(x, y, barWidth - 1, barHeight);
+    });
+
+    // Curseur rond de progression
+    const cursorX = progressWidth;
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(cursorX, height / 2, 4, 0, 2 * Math.PI);
+    ctx.fill();
+
+    // Ombre du curseur
+    ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
+    ctx.shadowBlur = 2;
+    ctx.shadowOffsetX = 1;
+    ctx.shadowOffsetY = 1;
+    ctx.beginPath();
+    ctx.arc(cursorX, height / 2, 4, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.shadowColor = "transparent";
+  }
+
+  setupWaveformEvents() {
+    let isDragging = false;
+
+    this.canvas.addEventListener("mousedown", (e) => {
+      isDragging = true;
+      this.state.isDragging = true;
+      this.updateProgressFromMouse(e);
+    });
+
+    this.canvas.addEventListener("mousemove", (e) => {
+      if (isDragging) {
+        this.updateProgressFromMouse(e);
+      }
+    });
+
+    this.canvas.addEventListener("mouseup", () => {
+      isDragging = false;
+      this.state.isDragging = false;
+    });
+
+    this.canvas.addEventListener("mouseleave", () => {
+      isDragging = false;
+      this.state.isDragging = false;
+    });
+
+    // Fallback pour les clics simples
+    this.canvas.addEventListener("click", (e) => {
+      if (!this.state.isDragging) {
+        this.updateProgressFromMouse(e);
+      }
+    });
+  }
+
+  updateProgressFromMouse(e) {
+    const rect = this.canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const progress = Math.max(0, Math.min(1, x / rect.width));
+
+    // Mise à jour visuelle en temps réel
+    this.drawWaveform(progress);
+
+    // Mise à jour de l'audio
+    this.audio.currentTime = this.audio.duration * progress;
+
+    // Mise à jour du temps affiché
+    DOMUtils.safeSetTextContent(
+      this.elements.timeDisplay,
+      `${AudioUtils.formatTime(
+        this.audio.currentTime
+      )} / ${AudioUtils.formatTime(this.audio.duration)}`
+    );
+
+    // Redémarrer l'animation si on est en train de jouer
+    if (this.state.isPlaying && !this.state.animationId) {
+      this.startProgressAnimation();
+    }
+  }
+
+  handleMetadataLoaded() {
+    // Géré par WaveSurfer maintenant
+  }
+
+  startProgressAnimation() {
+    this.state.animationId = requestAnimationFrame(() =>
+      this.updateProgressLoop()
+    );
+  }
+
+  stopProgressAnimation() {
+    if (this.state.animationId) {
+      cancelAnimationFrame(this.state.animationId);
+      this.state.animationId = null;
+    }
+  }
+
+  updateProgressLoop() {
+    if (this.state.isPlaying && !this.state.isDragging) {
+      this.updateProgress();
+      this.state.animationId = requestAnimationFrame(() =>
+        this.updateProgressLoop()
+      );
+    } else {
+      this.state.animationId = null;
     }
   }
 
   updateProgress() {
-    const progress = (this.audio.currentTime / this.audio.duration) * 100;
-    DOMUtils.safeSetStyle(this.elements.progressFill, "width", `${progress}%`);
-    DOMUtils.safeSetStyle(this.elements.progressThumb, "left", `${progress}%`);
+    const progress = this.audio.currentTime / this.audio.duration;
+    this.drawWaveform(progress);
     DOMUtils.safeSetTextContent(
       this.elements.timeDisplay,
       `${AudioUtils.formatTime(
@@ -415,17 +562,17 @@ class AudioPreview {
 
   play() {
     console.log("▶️ PLAY - Avant play:", this.audio.currentTime);
-    this.audio.play().catch((e) => console.log("Erreur lecture:", e));
     this.state.isPlaying = true;
-    console.log("▶️ PLAY - Après play:", this.audio.currentTime);
+    this.audio.play().catch((e) => console.log("Erreur lecture:", e));
+    this.startProgressAnimation();
     DOMUtils.safeSetInnerHTML(this.elements.playBtn, ICONS.PAUSE);
   }
 
   pause() {
     console.log("⏸️ PAUSE - Avant pause:", this.audio.currentTime);
-    this.audio.pause();
     this.state.isPlaying = false;
-    console.log("⏸️ PAUSE - Après pause:", this.audio.currentTime);
+    this.audio.pause();
+    this.stopProgressAnimation();
     DOMUtils.safeSetInnerHTML(this.elements.playBtn, ICONS.PLAY);
   }
 
@@ -541,6 +688,7 @@ class AudioPreview {
   handleAudioEnded() {
     console.log("🏁 FIN AUDIO - Remise à zéro normale");
     this.state.isPlaying = false;
+    this.stopProgressAnimation();
     DOMUtils.safeSetInnerHTML(this.elements.playBtn, ICONS.PLAY);
     DOMUtils.safeSetStyle(this.elements.progressFill, "width", "0%");
     DOMUtils.safeSetStyle(this.elements.progressThumb, "left", "0%");

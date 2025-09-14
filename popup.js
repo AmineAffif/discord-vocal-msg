@@ -8,7 +8,6 @@ const CONFIG = {
     FREE: "free",
     STARTER: "starter",
     PRO: "pro",
-    ULTIMATE: "ultimate",
   },
   STORAGE_KEYS: {
     CURRENT_PLAN: "currentPlan",
